@@ -1,73 +1,78 @@
-
-
 const express = require('express');
 const router = express.Router();
 
-var liftState = "IDLE"
-var direction = "NAN"
+var liftOneState = "IDLE"
+var liftOneDirection = "NAN"
 var liftTwoState = "IDLE"
 var liftTwoDirection = "NAN"
-var currentLiftPosition = 1
+var currentLiftOnePosition = 1
 var currentLiftTwoPosition = 1
 
-router.get('/smartKent/liftsimulation/', function(req, res) {
-    if(liftState=="IDLE" && liftTwoState=="IDLE"){
-        liftState = "TO_PICKUP"
-        if(req.query.fromFloor>currentLiftPosition){
-            direction = "UP" 
+router.get('/smartkent/liftsimulation/', function(req, res) {
+    if(liftOneState=="IDLE" && liftTwoState=="IDLE"){
+        liftOneState = "TO_PICKUP"
+        if(req.query.fromFloor>currentLiftOnePosition){
+            liftOneDirection = "UP" 
+        }
+        else if(req.query.fromFloor<currentLiftOnePosition){
+            liftOneDirection = "DOWN"
         }
         else{
-            direction = "DOWN"
+            liftOneDirection = "NAN"
         }
-      var timeToPassenger = (Math.abs(req.query.fromFloor-currentLiftPosition))*3
+      var timeToPassenger = (Math.abs(req.query.fromFloor-currentLiftOnePosition))*3
       var timetojourney = Math.abs((req.query.fromFloor-req.query.toFloor)*4)
-      console.log('Lift is coming ' + direction);
-      console.log('Lift will arrive within ' + timeToPassenger+ ' seconds');
+      console.log('Lift one is coming ' + liftOneDirection);
+      console.log('Lift one will arrive within ' + timeToPassenger+ ' seconds');
+      res.json({ ETA: timeToPassenger })
       console.log('Your journey will take ' + timetojourney + ' seconds');
 
-         console.log('Lift state is ' + liftState);
+         console.log('Lift one state is ' + liftOneState);
          console.log('################################################################ ');
      
          setTimeout(function() {  
              
-             liftState = "PICKUP" 
-             direction = "NAN"
-             currentLiftPosition = req.query.fromFloor
-             console.log("lift states is "+ liftState); 
-             console.log("Lift is at "+ currentLiftPosition + " floor"); 
+            liftOneState = "PICKUP" 
+            liftOneDirection = "NAN"
+             currentLiftOnePosition = req.query.fromFloor
+             console.log("lift one states is "+ liftOneState); 
+             console.log("Lift one is at "+ currentLiftOnePosition + " floor"); 
              console.log('################################################################ ');
 
             }, timeToPassenger*1000);
             
             setTimeout(function() {  
              
-                liftState = "TO_DROPOFF"   
-                if(req.query.toFloor>currentLiftPosition){
-                    direction = "UP" 
+                liftOneState = "TO_DROPOFF"   
+                if(req.query.fromFloor>currentLiftOnePosition){
+                    liftOneDirection = "UP" 
+                }
+                else if(req.query.fromFloor<currentLiftOnePosition){
+                    liftOneDirection = "DOWN"
                 }
                 else{
-                    direction = "DOWN"
-                }      
-                console.log("lift states is "+ liftState); 
+                    liftOneDirection = "NAN"
+                }   
+                console.log("lift one states is "+ liftOneState); 
                 console.log('################################################################ ');
 
                }, (timeToPassenger*1000)+4000);
 
             setTimeout(function() {  
             
-            liftState = "DROPOFF" 
-            direction = "NAN"
-            currentLiftPosition = req.query.toFloor
-            console.log("lift states is "+ liftState); 
+            liftOneState = "DROPOFF" 
+            liftOneDirection = "NAN"
+            currentLiftOnePosition = req.query.toFloor
+            console.log("lift one states is "+ liftOneState); 
             console.log('################################################################ ');
         }, (timeToPassenger*1000)+4000 + (timetojourney*1000));
 
             setTimeout(function() {  
             
-                liftState = "IDLE" 
+                liftOneState = "IDLE" 
                
-                console.log("lift states is "+ liftState); 
-                console.log("Lift is at "+ currentLiftPosition + " floor"); 
+                console.log("lift one states is "+ liftOneState); 
+                console.log("Lift one is at "+ currentLiftOnePosition + " floor"); 
                 }, (timeToPassenger*1000)+4000 + (timetojourney*1000) + 4000);
                
     }
@@ -88,7 +93,7 @@ router.get('/smartKent/liftsimulation/', function(req, res) {
           console.log('Lift two will arrive within ' + timeToPassenger+ ' seconds');
           console.log('Your journey will take ' + timetojourney + ' seconds');
     
-             console.log('Lift state is ' + liftTwoState);
+             console.log('Lift two state is ' + liftTwoState);
              console.log('################################################################ ');
          
              setTimeout(function() {  
@@ -97,7 +102,7 @@ router.get('/smartKent/liftsimulation/', function(req, res) {
                  liftTwoDirection = "NAN"
                  currentLiftTwoPosition = req.query.fromFloor
                  console.log("lift two states is "+ liftTwoState); 
-                 console.log("Lift two is at "+ currentLiftPosition + " floor"); 
+                 console.log("Lift two is at "+ currentLiftTwoPosition + " floor"); 
                  console.log('################################################################ ');
     
                 }, timeToPassenger*1000);
@@ -131,16 +136,13 @@ router.get('/smartKent/liftsimulation/', function(req, res) {
                    
                     console.log("lift two states is "+ liftTwoState); 
                     console.log("Lift two is at "+ currentLiftTwoPosition + " floor"); 
-                    }, (timeToPassenger*1000)+4000 + (timetojourney*1000) + 4000);
-                   
+                    }, (timeToPassenger*1000)+4000 + (timetojourney*1000) + 4000);  
         }
         else{
             console.log('Sorry all the lift are busy');
         }
     }
     
-    
   });
   
-
   module.exports = router;
